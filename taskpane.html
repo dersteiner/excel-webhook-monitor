@@ -44,6 +44,12 @@
             border: 1px solid #107c10;
         }
         
+        .status.inactive {
+            background: #fff4ce;
+            color: #797673;
+            border: 1px solid #d6d6d6;
+        }
+        
         .info-box {
             background: #f3f2f1;
             padding: 12px;
@@ -53,15 +59,39 @@
             line-height: 1.6;
         }
         
-        .webhook-url {
-            word-break: break-all;
-            font-family: 'Courier New', monospace;
-            font-size: 12px;
-            color: #605e5c;
-            background: #fff;
-            padding: 8px;
+        .info-box.tip {
+            background: #e1f5fe;
+            border-left: 4px solid #0078d4;
+        }
+        
+        .config-section {
+            margin: 20px 0;
+            padding: 15px;
+            background: #faf9f8;
             border-radius: 4px;
-            margin-top: 8px;
+        }
+        
+        .config-title {
+            font-weight: 600;
+            color: #323130;
+            margin-bottom: 10px;
+            font-size: 14px;
+        }
+        
+        .file-list {
+            list-style: none;
+            padding: 0;
+            margin: 10px 0;
+        }
+        
+        .file-list li {
+            padding: 6px 10px;
+            background: white;
+            margin: 5px 0;
+            border-radius: 4px;
+            border: 1px solid #edebe9;
+            font-family: 'Courier New', monospace;
+            font-size: 13px;
         }
         
         .log-section {
@@ -82,7 +112,7 @@
             border: 1px solid #edebe9;
             border-radius: 4px;
             padding: 12px;
-            max-height: 200px;
+            max-height: 300px;
             overflow-y: auto;
             font-family: 'Courier New', monospace;
             font-size: 12px;
@@ -102,6 +132,10 @@
             color: #d13438;
         }
         
+        .log-entry.info {
+            color: #0078d4;
+        }
+        
         .badge {
             display: inline-block;
             background: #0078d4;
@@ -110,7 +144,11 @@
             border-radius: 12px;
             font-size: 11px;
             font-weight: 600;
-            margin-left: 8px;
+            margin-left: 5px;
+        }
+        
+        .icon {
+            margin-right: 5px;
         }
     </style>
 </head>
@@ -118,33 +156,25 @@
     <div class="container">
         <h1>🔗 Webhook Monitor</h1>
         
-        <div class="status active">
-            ✅ Aktiv - Überwache Spalte G
+        <div id="status-container">
+            <!-- Status wird dynamisch geladen -->
         </div>
         
-        <div class="info-box">
-            <strong>Konfiguration:</strong><br>
+        <div class="config-section">
+            <div class="config-title">⚙️ Konfiguration</div>
             <strong>Überwachte Spalte:</strong> <span class="badge">G</span><br>
-            <strong>Webhook-Ziel:</strong>
-            <div class="webhook-url">
-                https://hook.eu2.make.com/df669kpkbrssyytnmm8turcwy7cql219
-            </div>
+            <strong>Proxy:</strong> Cloudflare Worker<br>
+            <strong>Autostart:</strong> Ja (nur für erlaubte Dateien)
         </div>
         
-        <div class="info-box">
-            <strong>ℹ️ Funktionsweise:</strong><br>
-            Wenn du eine Zelle in Spalte G änderst, wird automatisch ein Webhook gesendet mit:
-            <ul style="margin: 8px 0 0 0; padding-left: 20px;">
-                <li><strong>row:</strong> Zeilennummer</li>
-                <li><strong>value:</strong> Zelleninhalt</li>
-                <li><strong>timestamp:</strong> Zeitstempel</li>
-            </ul>
+        <div class="info-box tip">
+            <strong>💡 Info:</strong> Das Add-In überwacht nur Dateien, deren Name einen der konfigurierten Strings enthält. Andere Dateien werden ignoriert.
         </div>
         
         <div class="log-section">
-            <div class="log-title">📋 Letzte Events:</div>
+            <div class="log-title">📋 Event-Log:</div>
             <div id="log">
-                <div class="log-entry">Bereit - Warte auf Änderungen...</div>
+                <div class="log-entry">Initialisiere...</div>
             </div>
         </div>
     </div>
