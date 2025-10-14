@@ -1,25 +1,26 @@
-// Excel Webhook Monitor - Taskpane Script
-// Überwacht Spalte G und sendet Events an Make.com
+// Excel Webhook Monitor - Mit Cloudflare Worker Proxy
 
 Office.onReady((info) => {
   if (info.host === Office.HostType.Excel) {
     console.log("Excel Webhook Monitor bereit");
     addLog("✅ Webhook Monitor gestartet", "success");
-    
-    // Automatisch Event-Handler registrieren
     startMonitoring();
   }
 });
 
-// Event-Handler für Zelländerungen
+// ÄNDERE DIESE WERTE:
+// 1. Deine Cloudflare Worker URL
+const PROXY_URL = "autumn-sea-2657.daniel-steiner-mail.workers.dev
+";
+
+// 2. Dein API-Key (muss mit Worker übereinstimmen!)
+const API_KEY = "akdsadhoiadoiwoqi8wd";
+
 async function startMonitoring() {
   await Excel.run(async (context) => {
     try {
       const sheet = context.workbook.worksheets.getActiveWorksheet();
-      
-      // Event-Handler registrieren
       sheet.onChanged.add(handleCellChange);
-      
       await context.sync();
       console.log("Event-Handler registriert");
       addLog("🔍 Überwachung aktiv - Warte auf Änderungen in Spalte G...");
@@ -30,25 +31,21 @@ async function startMonitoring() {
   });
 }
 
-// Handler für Zelländerungen
 async function handleCellChange(event) {
   await Excel.run(async (context) => {
     try {
-      // Extrahiere Spalte und Zeile aus der Adresse (z.B. "G5")
       const match = event.address.match(/([A-Z]+)(\d+)/);
       if (!match) return;
       
       const column = match[1];
       const row = parseInt(match[2]);
       
-      // Prüfe ob Spalte G betroffen ist
       if (column !== "G") {
-        return; // Ignoriere andere Spalten
+        return;
       }
       
       addLog(`📝 Änderung erkannt: Zeile ${row}`);
       
-      // Hole den neuen Wert aus der Zelle
       const sheet = context.workbook.worksheets.getActiveWorksheet();
       const range = sheet.getRange(event.address);
       range.load("values");
@@ -57,7 +54,6 @@ async function handleCellChange(event) {
       const cellValue = range.values[0][0];
       console.log(`Zeile ${row}, Wert: ${cellValue}`);
       
-      // Sende Webhook
       await sendWebhook(row, cellValue);
       
     } catch (error) {
@@ -67,31 +63,34 @@ async function handleCellChange(event) {
   });
 }
 
-// Webhook an Make.com senden
 async function sendWebhook(rowNumber, cellContent) {
-  const webhookUrl = "https://hook.eu2.make.com/df669kpkbrssyytnmm8turcwy7cql219";
-  
   const payload = {
     row: rowNumber,
     value: cellContent,
     timestamp: new Date().toISOString()
   };
   
-  addLog(`📤 Sende Webhook: Zeile ${rowNumber}, Wert: "${cellContent}"`);
+  addLog(`📤 Sende via Proxy: Zeile ${rowNumber}`);
   
   try {
-    const response = await fetch(webhookUrl, {
+    // Sende an Cloudflare Worker (nicht direkt an Make.com!)
+    const response = await fetch(PROXY_URL, {
       method: 'POST',
       headers: {
-        'Content-Type': 'application/json'
+        'Content-Type': 'application/json',
+        'X-API-Key': API_KEY  // Authentifizierung
       },
       body: JSON.stringify(payload)
     });
     
-    if (response.ok) {
+    const result = await response.json();
+    
+    if (response.ok && result.success) {
       addLog(`✅ Webhook erfolgreich gesendet!`, "success");
+      console.log("Proxy response:", result);
     } else {
-      addLog(`⚠️ Webhook Fehler: ${response.status}`, "error");
+      addLog(`⚠️ Fehler: ${result.error || result.message}`, "error");
+      console.error("Proxy error:", result);
     }
   } catch (error) {
     console.error("Fetch-Fehler:", error);
@@ -99,19 +98,18 @@ async function sendWebhook(rowNumber, cellContent) {
   }
 }
 
-// Log-Eintrag hinzufügen
 function addLog(message, type = "") {
   const logDiv = document.getElementById("log");
+  if (!logDiv) return;
+  
   const entry = document.createElement("div");
   entry.className = "log-entry " + type;
   
   const timestamp = new Date().toLocaleTimeString("de-DE");
   entry.textContent = `[${timestamp}] ${message}`;
   
-  // Neuste Einträge oben
   logDiv.insertBefore(entry, logDiv.firstChild);
   
-  // Maximal 50 Einträge behalten
   while (logDiv.children.length > 50) {
     logDiv.removeChild(logDiv.lastChild);
   }
