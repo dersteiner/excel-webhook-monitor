@@ -11,7 +11,7 @@ Office.onReady((info) => {
 });
 
 
-const PROXY_URL = "autumn-sea-2657.daniel-steiner-mail.workers.dev";
+const PROXY_URL = "https://autumn-sea-2657.daniel-steiner-mail.workers.dev";
 
 // 2. Dein API-Key (muss mit Worker übereinstimmen!)
 const API_KEY = "akdsadhoiadoiwoqi8wd";
