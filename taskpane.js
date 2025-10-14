@@ -22,7 +22,7 @@ const API_KEY = "akdsadhoiadoiwoqi8wd";
 const ALLOWED_FILES = [
   "Tracking.xlsx",           // Exakter Dateiname
   "Projektliste.xlsx",       // Exakter Dateiname
-  "Anfragen",             // Teilstring - alle Dateien mit "Kundendaten" im Namen
+  "KOPIE",             // Teilstring - alle Dateien mit "Kundendaten" im Namen
   "2025",                    // Alle Dateien mit "2025" im Namen
 ];
 
