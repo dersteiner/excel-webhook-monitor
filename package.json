@@ -1,0 +1,26 @@
+{
+  "name": "excel-webhook-monitor",
+  "version": "1.0.0",
+  "description": "Excel Add-In zum Überwachen von Spalte G und Senden von Webhooks",
+  "main": "taskpane.html",
+  "scripts": {
+    "start": "office-addin-debugging start manifest.xml",
+    "stop": "office-addin-debugging stop manifest.xml",
+    "validate": "office-addin-manifest validate manifest.xml",
+    "serve": "http-server -p 3000 --cors"
+  },
+  "keywords": [
+    "Excel",
+    "Add-in",
+    "Webhook",
+    "Office"
+  ],
+  "author": "Deine Organisation",
+  "license": "MIT",
+  "devDependencies": {
+    "http-server": "^14.1.1",
+    "office-addin-debugging": "^5.0.0",
+    "office-addin-manifest": "^1.12.0"
+  },
+  "dependencies": {}
+}

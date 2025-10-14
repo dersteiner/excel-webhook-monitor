@@ -1,0 +1,120 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<OfficeApp xmlns="http://schemas.microsoft.com/office/appforoffice/1.1"
+           xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+           xmlns:bt="http://schemas.microsoft.com/office/officeappbasictypes/1.0"
+           xmlns:ov="http://schemas.microsoft.com/office/taskpaneappversionoverrides"
+           xsi:type="TaskPaneApp">
+
+  <!-- WICHTIG: Generiere eine neue GUID auf https://guidgenerator.com -->
+  <Id>cbe29b4b-d90d-4590-a963-6fe5676270ee</Id>
+  <Version>1.0.0.0</Version>
+  <ProviderName>Deine Organisation</ProviderName>
+  <DefaultLocale>de-DE</DefaultLocale>
+  <DisplayName DefaultValue="Excel Webhook Monitor"/>
+  <Description DefaultValue="Überwacht Spalte G und sendet Änderungen an Make.com Webhook"/>
+  
+  <!-- ÄNDERE DIESE URL: Ersetze USERNAME und REPO mit deinen GitHub-Werten -->
+  <IconUrl DefaultValue="https://dersteiner.github.io/excel-webhook-monitor/assets/icon-32.png"/>
+  <HighResolutionIconUrl DefaultValue="https://dersteiner.github.io/excel-webhook-monitor/assets/icon-64.png"/>
+  <SupportUrl DefaultValue="https://github.com/dersteiner/excel-webhook-monitor"/>
+  
+  <AppDomains>
+    <AppDomain>https://hook.eu2.make.com</AppDomain>
+  </AppDomains>
+  
+  <Hosts>
+    <Host Name="Workbook"/>
+  </Hosts>
+  
+  <!-- ÄNDERE DIESE URL: Deine GitHub Pages URL -->
+  <DefaultSettings>
+    <SourceLocation DefaultValue="https://dersteiner.github.io/excel-webhook-monitor/taskpane.html"/>
+  </DefaultSettings>
+  
+  <Permissions>ReadWriteDocument</Permissions>
+  
+  <VersionOverrides xmlns="http://schemas.microsoft.com/office/taskpaneappversionoverrides" xsi:type="VersionOverridesV1_0">
+    <Hosts>
+      <Host xsi:type="Workbook">
+        
+        <!-- Autostart beim Öffnen -->
+        <Runtimes>
+          <Runtime resid="Taskpane.Url" lifetime="long"/>
+        </Runtimes>
+        
+        <AllFormFactors>
+          <ExtensionPoint xsi:type="LaunchEvent">
+            <LaunchEvents>
+              <LaunchEvent Type="Office.OnReady" FunctionName="Office.initialize"/>
+            </LaunchEvents>
+            <SourceLocation resid="Taskpane.Url"/>
+          </ExtensionPoint>
+        </AllFormFactors>
+        
+        <!-- Ribbon Button -->
+        <DesktopFormFactor>
+          <GetStarted>
+            <Title resid="GetStarted.Title"/>
+            <Description resid="GetStarted.Description"/>
+            <LearnMoreUrl resid="GetStarted.LearnMoreUrl"/>
+          </GetStarted>
+          
+          <FunctionFile resid="Taskpane.Url"/>
+          
+          <ExtensionPoint xsi:type="PrimaryCommandSurface">
+            <OfficeTab id="TabHome">
+              <Group id="CommandsGroup">
+                <Label resid="CommandsGroup.Label"/>
+                <Icon>
+                  <bt:Image size="16" resid="Icon.16x16"/>
+                  <bt:Image size="32" resid="Icon.32x32"/>
+                  <bt:Image size="80" resid="Icon.80x80"/>
+                </Icon>
+                
+                <Control xsi:type="Button" id="TaskpaneButton">
+                  <Label resid="TaskpaneButton.Label"/>
+                  <Supertip>
+                    <Title resid="TaskpaneButton.Label"/>
+                    <Description resid="TaskpaneButton.Tooltip"/>
+                  </Supertip>
+                  <Icon>
+                    <bt:Image size="16" resid="Icon.16x16"/>
+                    <bt:Image size="32" resid="Icon.32x32"/>
+                    <bt:Image size="80" resid="Icon.80x80"/>
+                  </Icon>
+                  <Action xsi:type="ShowTaskpane">
+                    <TaskpaneId>ButtonId1</TaskpaneId>
+                    <SourceLocation resid="Taskpane.Url"/>
+                  </Action>
+                </Control>
+              </Group>
+            </OfficeTab>
+          </ExtensionPoint>
+        </DesktopFormFactor>
+      </Host>
+    </Hosts>
+    
+    <Resources>
+      <bt:Images>
+        <!-- ÄNDERE DIESE URLs -->
+        <bt:Image id="Icon.16x16" DefaultValue="https://dersteiner.github.io/excel-webhook-monitor/assets/icon-16.png"/>
+        <bt:Image id="Icon.32x32" DefaultValue="https://dersteiner.github.io/excel-webhook-monitor/assets/icon-32.png"/>
+        <bt:Image id="Icon.80x80" DefaultValue="https://dersteiner.github.io/excel-webhook-monitor/assets/icon-80.png"/>
+      </bt:Images>
+      <bt:Urls>
+        <!-- ÄNDERE DIESE URLs -->
+        <bt:Url id="GetStarted.LearnMoreUrl" DefaultValue="https://github.com/dersteiner/excel-webhook-monitor"/>
+        <bt:Url id="Taskpane.Url" DefaultValue="https://dersteiner.github.io/excel-webhook-monitor/taskpane.html"/>
+      </bt:Urls>
+      <bt:ShortStrings>
+        <bt:String id="GetStarted.Title" DefaultValue="Webhook Monitor"/>
+        <bt:String id="CommandsGroup.Label" DefaultValue="Webhook"/>
+        <bt:String id="TaskpaneButton.Label" DefaultValue="Status"/>
+      </bt:ShortStrings>
+      <bt:LongStrings>
+        <bt:String id="GetStarted.Description" DefaultValue="Überwacht Spalte G automatisch"/>
+        <bt:String id="TaskpaneButton.Tooltip" DefaultValue="Zeige Webhook Monitor Status"/>
+      </bt:LongStrings>
+    </Resources>
+  </VersionOverrides>
+</OfficeApp>

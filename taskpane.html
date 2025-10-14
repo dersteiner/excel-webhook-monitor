@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Excel Webhook Monitor</title>
+    
+    <!-- Office.js -->
+    <script src="https://appsforoffice.microsoft.com/lib/1/hosted/office.js"></script>
+    
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            padding: 20px;
+            margin: 0;
+            background: #f3f2f1;
+        }
+        
+        .container {
+            background: white;
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        
+        h1 {
+            color: #323130;
+            font-size: 20px;
+            margin-top: 0;
+            margin-bottom: 10px;
+        }
+        
+        .status {
+            padding: 12px;
+            border-radius: 4px;
+            margin: 15px 0;
+            font-weight: 500;
+        }
+        
+        .status.active {
+            background: #dff6dd;
+            color: #107c10;
+            border: 1px solid #107c10;
+        }
+        
+        .info-box {
+            background: #f3f2f1;
+            padding: 12px;
+            border-radius: 4px;
+            margin: 15px 0;
+            font-size: 14px;
+            line-height: 1.6;
+        }
+        
+        .webhook-url {
+            word-break: break-all;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            color: #605e5c;
+            background: #fff;
+            padding: 8px;
+            border-radius: 4px;
+            margin-top: 8px;
+        }
+        
+        .log-section {
+            margin-top: 20px;
+            padding-top: 20px;
+            border-top: 1px solid #edebe9;
+        }
+        
+        .log-title {
+            font-size: 14px;
+            font-weight: 600;
+            color: #323130;
+            margin-bottom: 10px;
+        }
+        
+        #log {
+            background: #faf9f8;
+            border: 1px solid #edebe9;
+            border-radius: 4px;
+            padding: 12px;
+            max-height: 200px;
+            overflow-y: auto;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            line-height: 1.8;
+        }
+        
+        .log-entry {
+            margin-bottom: 8px;
+            color: #323130;
+        }
+        
+        .log-entry.success {
+            color: #107c10;
+        }
+        
+        .log-entry.error {
+            color: #d13438;
+        }
+        
+        .badge {
+            display: inline-block;
+            background: #0078d4;
+            color: white;
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-size: 11px;
+            font-weight: 600;
+            margin-left: 8px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔗 Webhook Monitor</h1>
+        
+        <div class="status active">
+            ✅ Aktiv - Überwache Spalte G
+        </div>
+        
+        <div class="info-box">
+            <strong>Konfiguration:</strong><br>
+            <strong>Überwachte Spalte:</strong> <span class="badge">G</span><br>
+            <strong>Webhook-Ziel:</strong>
+            <div class="webhook-url">
+                https://hook.eu2.make.com/df669kpkbrssyytnmm8turcwy7cql219
+            </div>
+        </div>
+        
+        <div class="info-box">
+            <strong>ℹ️ Funktionsweise:</strong><br>
+            Wenn du eine Zelle in Spalte G änderst, wird automatisch ein Webhook gesendet mit:
+            <ul style="margin: 8px 0 0 0; padding-left: 20px;">
+                <li><strong>row:</strong> Zeilennummer</li>
+                <li><strong>value:</strong> Zelleninhalt</li>
+                <li><strong>timestamp:</strong> Zeitstempel</li>
+            </ul>
+        </div>
+        
+        <div class="log-section">
+            <div class="log-title">📋 Letzte Events:</div>
+            <div id="log">
+                <div class="log-entry">Bereit - Warte auf Änderungen...</div>
+            </div>
+        </div>
+    </div>
+    
+    <script src="taskpane.js"></script>
+</body>
+</html>

@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Excel Webhook Monitor</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        
+        .container {
+            background: white;
+            border-radius: 16px;
+            padding: 40px;
+            max-width: 600px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        }
+        
+        h1 {
+            color: #333;
+            margin-bottom: 10px;
+            font-size: 32px;
+        }
+        
+        .subtitle {
+            color: #666;
+            margin-bottom: 30px;
+            font-size: 16px;
+        }
+        
+        .status {
+            background: #d4edda;
+            color: #155724;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 30px;
+            border: 1px solid #c3e6cb;
+            font-weight: 500;
+        }
+        
+        .info-section {
+            margin-bottom: 25px;
+        }
+        
+        .info-section h2 {
+            color: #333;
+            font-size: 18px;
+            margin-bottom: 10px;
+        }
+        
+        .info-section p {
+            color: #666;
+            line-height: 1.6;
+            margin-bottom: 10px;
+        }
+        
+        .install-steps {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 8px;
+            margin-top: 20px;
+        }
+        
+        .install-steps ol {
+            margin-left: 20px;
+        }
+        
+        .install-steps li {
+            color: #333;
+            margin-bottom: 10px;
+            line-height: 1.6;
+        }
+        
+        .button {
+            display: inline-block;
+            background: #667eea;
+            color: white;
+            padding: 12px 24px;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: 600;
+            margin-top: 20px;
+            transition: background 0.3s;
+        }
+        
+        .button:hover {
+            background: #5568d3;
+        }
+        
+        .code {
+            background: #f4f4f4;
+            padding: 3px 8px;
+            border-radius: 4px;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+            color: #e83e8c;
+        }
+        
+        .footer {
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 1px solid #eee;
+            text-align: center;
+            color: #999;
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔗 Excel Webhook Monitor</h1>
+        <p class="subtitle">Automatische Webhook-Benachrichtigungen bei Excel-Änderungen</p>
+        
+        <div class="status">
+            ✅ Add-In erfolgreich deployed!
+        </div>
+        
+        <div class="info-section">
+            <h2>Was macht dieses Add-In?</h2>
+            <p>
+                Dieses Excel Add-In überwacht <strong>Spalte G</strong> in deinen Excel-Dateien 
+                und sendet automatisch einen Webhook an Make.com, sobald eine Zelle geändert wird.
+            </p>
+            <p>
+                Der Webhook enthält die <span class="code">Zeilennummer</span>, 
+                den <span class="code">Zelleninhalt</span> und einen <span class="code">Zeitstempel</span>.
+            </p>
+        </div>
+        
+        <div class="info-section">
+            <h2>📥 Installation</h2>
+            <div class="install-steps">
+                <ol>
+                    <li>Öffne Excel Online oder Excel Desktop</li>
+                    <li>Gehe zu <strong>Einfügen</strong> → <strong>Add-Ins</strong> → <strong>Meine Add-Ins</strong></li>
+                    <li>Klicke auf <strong>Benutzerdefiniertes Add-In hochladen</strong></li>
+                    <li>Wähle die <span class="code">manifest.xml</span> Datei aus diesem Repository</li>
+                    <li>Das Add-In startet automatisch beim Öffnen der Datei</li>
+                </ol>
+            </div>
+        </div>
+        
+        <div class="info-section">
+            <h2>🔧 Konfiguration</h2>
+            <p>
+                <strong>Überwachte Spalte:</strong> G<br>
+                <strong>Webhook-URL:</strong> Make.com Hook<br>
+                <strong>Autostart:</strong> Ja
+            </p>
+        </div>
+        
+        <a href="manifest.xml" class="button" download>📄 Manifest.xml herunterladen</a>
+        
+        <div class="footer">
+            Excel Webhook Monitor v1.0 | Powered by Office.js
+        </div>
+    </div>
+</body>
+</html>
