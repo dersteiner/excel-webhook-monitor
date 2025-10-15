@@ -145,37 +145,23 @@ async function handleCellChange(event) {
       addLog(`📝 Änderung in Spalte G: Zeile ${row}`);
       
       const sheet = context.workbook.worksheets.getActiveWorksheet();
-      const usedRange = sheet.getUsedRange();
-      usedRange.load("columnCount");
-      await context.sync();
       
-      // Hole die Header-Zeile (Zeile 1)
-      const headerRange = sheet.getRangeByIndexes(0, 0, 1, usedRange.columnCount);
-      headerRange.load("values");
-      
-      // Hole die Datenzeile
-      const rowRange = sheet.getRangeByIndexes(
-        row - 1,
-        0,
-        1,
-        usedRange.columnCount
-      );
+      // OPTION 1: Hole die gesamte Zeile mit getRange (einfacher)
+      const rowRange = sheet.getRange(`${row}:${row}`);
       rowRange.load("values");
-      
       await context.sync();
       
-      const headers = headerRange.values[0];
-      const rowData = rowRange.values[0];
-      
-      // Erstelle Objekt mit Spaltennamen als Keys
-      const rowObject = {};
-      headers.forEach((header, index) => {
-        rowObject[header || `Spalte_${index + 1}`] = rowData[index];
+      // Filtere leere Zellen am Ende raus
+      const rowData = rowRange.values[0].filter((val, index) => {
+        // Behalte alle Werte bis zur letzten nicht-leeren Zelle
+        const lastNonEmpty = rowRange.values[0].findLastIndex(v => v !== "" && v !== null && v !== undefined);
+        return index <= lastNonEmpty;
       });
       
-      console.log(`📊 Zeile ${row} als Objekt:`, rowObject);
+      console.log(`📊 Gesamte Zeile ${row}:`, rowData);
+      console.log(`📊 Anzahl Spalten: ${rowData.length}`);
       
-      await sendWebhook(row, rowObject);
+      await sendWebhook(row, rowData);
     });
   } catch (error) {
     console.error("❌ Fehler in handleCellChange:", error);
@@ -186,9 +172,17 @@ async function handleCellChange(event) {
 async function sendWebhook(rowNumber, rowData) {
   console.log("📤 Sende Webhook...");
   
+  // Prüfe, ob rowData valide ist
+  if (!Array.isArray(rowData) || rowData.length === 0) {
+    console.error("❌ rowData ist ungültig:", rowData);
+    addLog("❌ Fehler: Keine Daten in der Zeile gefunden", "error");
+    return;
+  }
+  
   const payload = {
     row: rowNumber,
-    data: rowData,  // Gesamtes Array mit allen Zellwerten
+    value: rowData[6],  // Spalte G (Index 6 = 7. Spalte)
+    data: rowData,      // Gesamtes Array
     timestamp: new Date().toISOString()
   };
   
