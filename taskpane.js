@@ -146,28 +146,44 @@ async function handleCellChange(event) {
       
       const sheet = context.workbook.worksheets.getActiveWorksheet();
       
-      // OPTION 1: Hole die gesamte Zeile mit getRange (einfacher)
-      const rowRange = sheet.getRange(`${row}:${row}`);
+      // Hole Spalten A bis P (16 Spalten)
+      const rowRange = sheet.getRange(`A${row}:P${row}`);
       rowRange.load("values");
       await context.sync();
       
-      // Filtere leere Zellen am Ende raus
-      const rowData = rowRange.values[0].filter((val, index) => {
-        // Behalte alle Werte bis zur letzten nicht-leeren Zelle
-        const lastNonEmpty = rowRange.values[0].findLastIndex(v => v !== "" && v !== null && v !== undefined);
-        return index <= lastNonEmpty;
-      });
+      console.log("📊 rowRange.values:", rowRange.values);
       
-      console.log(`📊 Gesamte Zeile ${row}:`, rowData);
+      // Validierung
+      if (!rowRange.values || !rowRange.values[0]) {
+        console.error("❌ Keine Daten in rowRange.values");
+        addLog("❌ Fehler: Zeile enthält keine Daten", "error");
+        return;
+      }
+      
+      const rowData = rowRange.values[0];
+      
+      console.log(`📊 Gesamte Zeile ${row} (A-P):`, rowData);
       console.log(`📊 Anzahl Spalten: ${rowData.length}`);
+      
+      // Zeige welche Zellen leer sind (optional für Debugging)
+      rowData.forEach((value, index) => {
+        const colLetter = String.fromCharCode(65 + index); // A=65, B=66, etc.
+        if (value === "" || value === null || value === undefined) {
+          console.log(`  ⚪ Spalte ${colLetter}: leer`);
+        } else {
+          console.log(`  ✓ Spalte ${colLetter}: "${value}"`);
+        }
+      });
       
       await sendWebhook(row, rowData);
     });
   } catch (error) {
     console.error("❌ Fehler in handleCellChange:", error);
+    console.error("❌ Stack:", error.stack);
     addLog("❌ Fehler: " + error.message, "error");
   }
 }
+
 
 async function sendWebhook(rowNumber, rowData) {
   console.log("📤 Sende Webhook...");
