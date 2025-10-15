@@ -146,36 +146,36 @@ async function handleCellChange(event) {
       
       const sheet = context.workbook.worksheets.getActiveWorksheet();
       
-      // Hole Spalten A bis P (16 Spalten)
-      const rowRange = sheet.getRange(`A${row}:P${row}`);
-      rowRange.load("values");
+      // Hole Header (Zeile 1) UND Datenzeile
+      const headerRange = sheet.getRange("A1:P1");
+      const dataRange = sheet.getRange(`A${row}:P${row}`);
+      
+      headerRange.load("values");
+      dataRange.load("values");
+      
       await context.sync();
       
-      console.log("📊 rowRange.values:", rowRange.values);
-      
-      // Validierung
-      if (!rowRange.values || !rowRange.values[0]) {
-        console.error("❌ Keine Daten in rowRange.values");
+      if (!dataRange.values || !dataRange.values[0]) {
+        console.error("❌ Keine Daten gefunden");
         addLog("❌ Fehler: Zeile enthält keine Daten", "error");
         return;
       }
       
-      const rowData = rowRange.values[0];
+      const headers = headerRange.values[0];
+      const rowData = dataRange.values[0];
       
-      console.log(`📊 Gesamte Zeile ${row} (A-P):`, rowData);
-      console.log(`📊 Anzahl Spalten: ${rowData.length}`);
-      
-      // Zeige welche Zellen leer sind (optional für Debugging)
-      rowData.forEach((value, index) => {
-        const colLetter = String.fromCharCode(65 + index); // A=65, B=66, etc.
-        if (value === "" || value === null || value === undefined) {
-          console.log(`  ⚪ Spalte ${colLetter}: leer`);
-        } else {
-          console.log(`  ✓ Spalte ${colLetter}: "${value}"`);
-        }
+      // Erstelle Objekt mit Spaltennamen
+      const rowObject = {};
+      headers.forEach((header, index) => {
+        const colLetter = String.fromCharCode(65 + index); // A, B, C, ...
+        const key = header || `Spalte_${colLetter}`;
+        const value = rowData[index];
+        rowObject[key] = (value === "" || value === undefined) ? null : value;
       });
       
-      await sendWebhook(row, rowData);
+      console.log(`📊 Zeile ${row} als Objekt:`, rowObject);
+      
+      await sendWebhook(row, rowObject);
     });
   } catch (error) {
     console.error("❌ Fehler in handleCellChange:", error);
