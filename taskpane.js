@@ -187,23 +187,59 @@ async function handleCellChange(event) {
 
 async function sendWebhook(rowNumber, rowData) {
   console.log("📤 Sende Webhook...");
+  console.log("🔍 rowData type:", typeof rowData);
+  console.log("🔍 rowData:", rowData);
   
-  // Prüfe, ob rowData valide ist
-  if (!Array.isArray(rowData) || rowData.length === 0) {
-    console.error("❌ rowData ist ungültig:", rowData);
-    addLog("❌ Fehler: Keine Daten in der Zeile gefunden", "error");
+  // Prüfe ob rowData ein Objekt oder Array ist
+  let payload;
+  
+  if (Array.isArray(rowData)) {
+    // Array-Format (A-P)
+    console.log("✅ Array-Format erkannt");
+    
+    if (rowData.length === 0) {
+      console.error("❌ Array ist leer");
+      addLog("❌ Fehler: Keine Daten in der Zeile", "error");
+      return;
+    }
+    
+    payload = {
+      row: rowNumber,
+      value: rowData[6],  // Spalte G (Index 6)
+      data: rowData,
+      timestamp: new Date().toISOString()
+    };
+    
+  } else if (typeof rowData === 'object' && rowData !== null) {
+    // Objekt-Format (mit Spaltennamen)
+    console.log("✅ Objekt-Format erkannt");
+    
+    const keys = Object.keys(rowData);
+    if (keys.length === 0) {
+      console.error("❌ Objekt ist leer");
+      addLog("❌ Fehler: Keine Daten in der Zeile", "error");
+      return;
+    }
+    
+    // Finde den Wert von Spalte G
+    // Der Key könnte "Spalte_G" oder der Header-Name sein
+    const columnGValue = rowData['Spalte_G'] || Object.values(rowData)[6] || null;
+    
+    payload = {
+      row: rowNumber,
+      value: columnGValue,
+      data: rowData,
+      timestamp: new Date().toISOString()
+    };
+    
+  } else {
+    console.error("❌ rowData hat ungültiges Format:", rowData);
+    addLog("❌ Fehler: Ungültiges Datenformat", "error");
     return;
   }
   
-  const payload = {
-    row: rowNumber,
-    value: rowData[6],  // Spalte G (Index 6 = 7. Spalte)
-    data: rowData,      // Gesamtes Array
-    timestamp: new Date().toISOString()
-  };
-  
-  console.log("📦 Payload:", payload);
-  addLog(`📤 Sende Webhook: Zeile ${rowNumber} mit ${rowData.length} Spalten`);
+  console.log("📦 Payload:", JSON.stringify(payload, null, 2));
+  addLog(`📤 Sende Webhook: Zeile ${rowNumber}`);
   
   if (!PROXY_URL || PROXY_URL.includes("DEIN-SUBDOMAIN")) {
     console.error("❌ PROXY_URL nicht konfiguriert!");
