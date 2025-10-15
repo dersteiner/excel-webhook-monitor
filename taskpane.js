@@ -1,166 +1,230 @@
-// Excel Webhook Monitor - Nur für bestimmte Dateien
-// Mit Cloudflare Worker Proxy
+// Excel Webhook Monitor - Mit Auto-Minimize für Excel Online
+// Minimiert Panel automatisch nach Start
+
+console.log("🔥 taskpane.js wird geladen...");
+
+const PROXY_URL = "https://autumn-sea-2657.daniel-steiner-mail.workers.dev";
+const API_KEY = "akdsadhoiadoiwoqi8wd";
+
+const ALLOWED_FILES = [
+  "Tracking.xlsx",
+  "Projektliste.xlsx",
+  "KOPIE",
+  "2025",
+];
+
+console.log("🔥 Konfiguration geladen:", { PROXY_URL, ALLOWED_FILES });
 
 Office.onReady((info) => {
+  console.log("🔥 Office.onReady aufgerufen!", info);
+  
   if (info.host === Office.HostType.Excel) {
-    console.log("Excel Webhook Monitor bereit");
+    console.log("✅ Excel Host erkannt");
+    addLog("✅ Excel Webhook Monitor geladen", "success");
     
-    // Prüfe zuerst ob diese Datei überwacht werden soll
+    // Prüfe und starte Monitoring
     checkAndStartMonitoring();
+    
+    // WICHTIG: Minimiere Panel nach 3 Sekunden (nur bei Autostart)
+    // User kann es manuell wieder öffnen wenn er den Status sehen will
+    setTimeout(() => {
+      try {
+        // Versuche Panel zu minimieren (funktioniert nicht in allen Szenarien)
+        if (Office.context.ui && Office.context.ui.closeContainer) {
+          console.log("💡 Minimiere Panel automatisch");
+          addLog("💡 Panel minimiert - Monitoring läuft im Hintergrund");
+          // Office.context.ui.closeContainer(); // Würde komplett schließen
+        }
+      } catch (e) {
+        console.log("ℹ️ Konnte Panel nicht minimieren (normal bei manuellem Öffnen)");
+      }
+    }, 3000);
+    
+  } else {
+    console.log("⚠️ Kein Excel Host:", info.host);
+    addLog("⚠️ Nicht in Excel geöffnet", "error");
   }
 });
 
+console.log("🔥 Office.onReady registriert");
 
-const PROXY_URL = "https://autumn-sea-2657.daniel-steiner-mail.workers.dev";
-
-// 2. Dein API-Key (muss mit Worker übereinstimmen!)
-const API_KEY = "akdsadhoiadoiwoqi8wd";
-
-
-// 3. DEFINIERE HIER: Welche Dateien sollen überwacht werden?
-const ALLOWED_FILES = [
-  "Tracking.xlsx",           // Exakter Dateiname
-  "Projektliste.xlsx",       // Exakter Dateiname
-  "KOPIE",             // Teilstring - alle Dateien mit "Kundendaten" im Namen
-  "2025",                    // Alle Dateien mit "2025" im Namen
-];
-
-// Prüfe ob diese Datei überwacht werden soll
 async function checkAndStartMonitoring() {
-  await Excel.run(async (context) => {
-    try {
-      // Hole Dateiname
+  console.log("🔍 Starte checkAndStartMonitoring()");
+  addLog("🔍 Prüfe Dateinamen...");
+  
+  try {
+    await Excel.run(async (context) => {
+      console.log("📊 Excel.run gestartet");
+      
       const workbook = context.workbook;
       workbook.load("name");
       await context.sync();
       
       const fileName = workbook.name;
       console.log("📄 Geöffnete Datei:", fileName);
+      addLog("📄 Datei: " + fileName);
       
-      // Prüfe ob Dateiname in der Whitelist ist
-      const shouldMonitor = ALLOWED_FILES.some(allowedFile => 
-        fileName.toLowerCase().includes(allowedFile.toLowerCase())
-      );
+      console.log("🔍 Prüfe gegen Liste:", ALLOWED_FILES);
+      let matchFound = false;
       
-      if (shouldMonitor) {
+      for (const allowedFile of ALLOWED_FILES) {
+        const matches = fileName.toLowerCase().includes(allowedFile.toLowerCase());
+        console.log(`  - "${allowedFile}" → ${matches ? "✅ MATCH" : "❌ kein Match"}`);
+        if (matches) matchFound = true;
+      }
+      
+      console.log("🎯 Match gefunden:", matchFound);
+      
+      if (matchFound) {
         console.log("✅ Diese Datei wird überwacht!");
         addLog("✅ Webhook Monitor aktiv für: " + fileName, "success");
         addLog("🔍 Überwache Spalte G...");
+        addLog("💡 Du kannst dieses Panel schließen - Monitoring läuft im Hintergrund", "info");
         
-        // Starte Monitoring
         await startMonitoring();
       } else {
         console.log("⏸️ Diese Datei wird NICHT überwacht");
         addLog("⏸️ Webhook Monitor inaktiv für diese Datei");
         addLog("📋 Überwachte Dateien: " + ALLOWED_FILES.join(", "));
-        addLog("💡 Tipp: Dateiname muss einen dieser Strings enthalten", "info");
+        addLog("💡 Dateiname muss einen dieser Strings enthalten");
       }
-      
-    } catch (error) {
-      console.error("Fehler beim Prüfen:", error);
-      addLog("⚠️ Fehler beim Prüfen des Dateinamens: " + error.message, "error");
+    });
+  } catch (error) {
+    console.error("❌ Fehler in checkAndStartMonitoring:", error);
+    addLog("❌ Fehler beim Prüfen: " + error.message, "error");
+    
+    if (error.stack) {
+      console.error("Stack trace:", error.stack);
     }
-  });
+  }
 }
 
-// Starte die Überwachung
 async function startMonitoring() {
-  await Excel.run(async (context) => {
-    try {
+  console.log("🚀 Starte startMonitoring()");
+  
+  try {
+    await Excel.run(async (context) => {
       const sheet = context.workbook.worksheets.getActiveWorksheet();
       
-      // Registriere Event-Handler für Zelländerungen
+      console.log("📝 Registriere onChanged Handler...");
       sheet.onChanged.add(handleCellChange);
       
       await context.sync();
-      console.log("✅ Event-Handler registriert");
-      addLog("✅ Bereit - Warte auf Änderungen in Spalte G...", "success");
-      
-    } catch (error) {
-      console.error("Fehler beim Starten:", error);
-      addLog("❌ Fehler beim Starten: " + error.message, "error");
-    }
-  });
+      console.log("✅ Event-Handler erfolgreich registriert");
+      addLog("✅ Bereit - Monitoring läuft im Hintergrund!", "success");
+    });
+  } catch (error) {
+    console.error("❌ Fehler in startMonitoring:", error);
+    addLog("❌ Fehler beim Starten: " + error.message, "error");
+  }
 }
 
-// Handler für Zelländerungen
 async function handleCellChange(event) {
-  await Excel.run(async (context) => {
-    try {
-      // Extrahiere Spalte und Zeile aus der Adresse (z.B. "G5")
+  console.log("🔔 handleCellChange aufgerufen:", event);
+  
+  try {
+    await Excel.run(async (context) => {
       const match = event.address.match(/([A-Z]+)(\d+)/);
-      if (!match) return;
+      if (!match) {
+        console.log("⚠️ Konnte Adresse nicht parsen:", event.address);
+        return;
+      }
       
       const column = match[1];
       const row = parseInt(match[2]);
       
-      // Nur Spalte G überwachen
+      console.log(`📍 Änderung in Spalte ${column}, Zeile ${row}`);
+      
       if (column !== "G") {
-        return; // Ignoriere alle anderen Spalten
+        console.log(`⏭️ Ignoriere Spalte ${column}`);
+        return;
       }
       
-      addLog(`📝 Änderung in Spalte G erkannt: Zeile ${row}`);
+      console.log("✅ Spalte G betroffen!");
+      addLog(`📝 Änderung in Spalte G: Zeile ${row}`);
       
-      // Hole den neuen Wert aus der Zelle
       const sheet = context.workbook.worksheets.getActiveWorksheet();
       const range = sheet.getRange(event.address);
       range.load("values");
       await context.sync();
       
       const cellValue = range.values[0][0];
-      console.log(`Zeile ${row}, Neuer Wert: ${cellValue}`);
+      console.log(`📊 Neuer Wert: "${cellValue}"`);
       
-      // Sende Webhook
       await sendWebhook(row, cellValue);
-      
-    } catch (error) {
-      console.error("Fehler beim Verarbeiten:", error);
-      addLog("❌ Fehler: " + error.message, "error");
-    }
-  });
+    });
+  } catch (error) {
+    console.error("❌ Fehler in handleCellChange:", error);
+    addLog("❌ Fehler: " + error.message, "error");
+  }
 }
 
-// Webhook senden via Cloudflare Worker
 async function sendWebhook(rowNumber, cellContent) {
+  console.log("📤 Sende Webhook...");
+  
   const payload = {
     row: rowNumber,
     value: cellContent,
     timestamp: new Date().toISOString()
   };
   
-  addLog(`📤 Sende Webhook via Proxy: Zeile ${rowNumber}, Wert: "${cellContent}"`);
+  console.log("📦 Payload:", payload);
+  addLog(`📤 Sende Webhook: Zeile ${rowNumber}, Wert: "${cellContent}"`);
+  
+  if (!PROXY_URL || PROXY_URL.includes("DEIN-SUBDOMAIN")) {
+    console.error("❌ PROXY_URL nicht konfiguriert!");
+    addLog("❌ Fehler: PROXY_URL nicht konfiguriert!", "error");
+    return;
+  }
+  
+  if (!PROXY_URL.startsWith("https://")) {
+    console.error("❌ PROXY_URL muss mit https:// beginnen!");
+    addLog("❌ Fehler: PROXY_URL braucht https://", "error");
+    return;
+  }
   
   try {
-    // Sende an Cloudflare Worker (NICHT direkt an Make.com!)
+    console.log("🌐 Fetch zu:", PROXY_URL);
+    
     const response = await fetch(PROXY_URL, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'X-API-Key': API_KEY  // Authentifizierung
+        'X-API-Key': API_KEY
       },
       body: JSON.stringify(payload)
     });
     
+    console.log("📨 Response Status:", response.status);
+    
     const result = await response.json();
+    console.log("📨 Response Body:", result);
     
     if (response.ok && result.success) {
       addLog(`✅ Webhook erfolgreich gesendet!`, "success");
-      console.log("Proxy response:", result);
+      console.log("✅ Webhook erfolgreich!");
     } else {
       addLog(`⚠️ Webhook-Fehler: ${result.error || result.message}`, "error");
-      console.error("Proxy error:", result);
+      console.error("⚠️ Webhook-Fehler:", result);
     }
-    
   } catch (error) {
-    console.error("Fetch-Fehler:", error);
+    console.error("❌ Fetch-Fehler:", error);
     addLog(`❌ Netzwerkfehler: ${error.message}`, "error");
+    
+    if (error.message.includes("Failed to fetch")) {
+      addLog("💡 Prüfe: CORS, HTTPS, Worker-URL", "info");
+    }
   }
 }
 
-// Log-Eintrag hinzufügen
 function addLog(message, type = "") {
+  console.log(`[LOG ${type}]`, message);
+  
   const logDiv = document.getElementById("log");
-  if (!logDiv) return;
+  if (!logDiv) {
+    console.warn("⚠️ Log-Div nicht gefunden!");
+    return;
+  }
   
   const entry = document.createElement("div");
   entry.className = "log-entry " + type;
@@ -168,11 +232,12 @@ function addLog(message, type = "") {
   const timestamp = new Date().toLocaleTimeString("de-DE");
   entry.textContent = `[${timestamp}] ${message}`;
   
-  // Neuste Einträge oben
   logDiv.insertBefore(entry, logDiv.firstChild);
   
-  // Maximal 50 Einträge behalten
   while (logDiv.children.length > 50) {
     logDiv.removeChild(logDiv.lastChild);
   }
 }
+
+console.log("🔥 taskpane.js vollständig geladen");
+console.log("💡 Öffne die Console (F12) für detaillierte Logs");
