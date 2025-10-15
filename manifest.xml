@@ -13,7 +13,7 @@
   <Description DefaultValue="Überwacht Spalte G und sendet Änderungen an Make.com Webhook"/>
   
   <!-- ÄNDERE DIESE URLs: Deine GitHub Pages URLs -->
-  <IconUrl DefaultValue="https://dersteiner.github.io/excel-webhook-monitor/icons/icon-32.png"/>
+  <IconUrl DefaultValue="https://dersteiner.github.io/excel-webhook-monitor/assets/icon-32.png"/>
   <HighResolutionIconUrl DefaultValue="https://dersteiner.github.io/excel-webhook-monitor/icons/icon-64.png"/>
   <SupportUrl DefaultValue="https://github.com/dersteiner/excel-webhook-monitor"/>
   
