@@ -14,7 +14,7 @@
   
   <!-- ÄNDERE DIESE URLs: Deine GitHub Pages URLs -->
   <IconUrl DefaultValue="https://dersteiner.github.io/excel-webhook-monitor/assets/icon-32.png"/>
-  <HighResolutionIconUrl DefaultValue="https://dersteiner.github.io/excel-webhook-monitor/icons/icon-64.png"/>
+  <HighResolutionIconUrl DefaultValue="https://dersteiner.github.io/excel-webhook-monitor/assets/icon-64.png"/>
   <SupportUrl DefaultValue="https://github.com/dersteiner/excel-webhook-monitor"/>
   
   <AppDomains>
@@ -93,9 +93,9 @@
     
     <Resources>
       <bt:Images>
-        <bt:Image id="Icon.16x16" DefaultValue="https://dersteiner.github.io/excel-webhook-monitor/icons/icon-16.png"/>
-        <bt:Image id="Icon.32x32" DefaultValue="https://dersteiner.github.io/excel-webhook-monitor/icons/icon-32.png"/>
-        <bt:Image id="Icon.80x80" DefaultValue="https://dersteiner.github.io/excel-webhook-monitor/icons/icon-80.png"/>
+        <bt:Image id="Icon.16x16" DefaultValue="https://dersteiner.github.io/excel-webhook-monitor/assets/icon-16.png"/>
+        <bt:Image id="Icon.32x32" DefaultValue="https://dersteiner.github.io/excel-webhook-monitor/assets/icon-32.png"/>
+        <bt:Image id="Icon.80x80" DefaultValue="https://dersteiner.github.io/excel-webhook-monitor/assets/icon-80.png"/>
       </bt:Images>
       <bt:Urls>
         <bt:Url id="GetStarted.LearnMoreUrl" DefaultValue="https://github.com/dersteiner/excel-webhook-monitor"/>
