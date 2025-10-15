@@ -119,6 +119,7 @@ async function startMonitoring() {
   }
 }
 
+
 async function handleCellChange(event) {
   console.log("🔔 handleCellChange aufgerufen:", event);
   
@@ -144,14 +145,37 @@ async function handleCellChange(event) {
       addLog(`📝 Änderung in Spalte G: Zeile ${row}`);
       
       const sheet = context.workbook.worksheets.getActiveWorksheet();
-      const range = sheet.getRange(event.address);
-      range.load("values");
+      const usedRange = sheet.getUsedRange();
+      usedRange.load("columnCount");
       await context.sync();
       
-      const cellValue = range.values[0][0];
-      console.log(`📊 Neuer Wert: "${cellValue}"`);
+      // Hole die Header-Zeile (Zeile 1)
+      const headerRange = sheet.getRangeByIndexes(0, 0, 1, usedRange.columnCount);
+      headerRange.load("values");
       
-      await sendWebhook(row, cellValue);
+      // Hole die Datenzeile
+      const rowRange = sheet.getRangeByIndexes(
+        row - 1,
+        0,
+        1,
+        usedRange.columnCount
+      );
+      rowRange.load("values");
+      
+      await context.sync();
+      
+      const headers = headerRange.values[0];
+      const rowData = rowRange.values[0];
+      
+      // Erstelle Objekt mit Spaltennamen als Keys
+      const rowObject = {};
+      headers.forEach((header, index) => {
+        rowObject[header || `Spalte_${index + 1}`] = rowData[index];
+      });
+      
+      console.log(`📊 Zeile ${row} als Objekt:`, rowObject);
+      
+      await sendWebhook(row, rowObject);
     });
   } catch (error) {
     console.error("❌ Fehler in handleCellChange:", error);
@@ -159,17 +183,17 @@ async function handleCellChange(event) {
   }
 }
 
-async function sendWebhook(rowNumber, cellContent) {
+async function sendWebhook(rowNumber, rowData) {
   console.log("📤 Sende Webhook...");
   
   const payload = {
     row: rowNumber,
-    value: cellContent,
+    data: rowData,  // Gesamtes Array mit allen Zellwerten
     timestamp: new Date().toISOString()
   };
   
   console.log("📦 Payload:", payload);
-  addLog(`📤 Sende Webhook: Zeile ${rowNumber}, Wert: "${cellContent}"`);
+  addLog(`📤 Sende Webhook: Zeile ${rowNumber} mit ${rowData.length} Spalten`);
   
   if (!PROXY_URL || PROXY_URL.includes("DEIN-SUBDOMAIN")) {
     console.error("❌ PROXY_URL nicht konfiguriert!");
