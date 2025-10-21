@@ -106,13 +106,16 @@ function initializeUI() {
 }
 
 // ===== MONITORING STEUERUNG =====
-let isMonitoringActive = false;
+ilet isMonitoringActive = false;
 let eventHandlerContext = null;
+let handlerCallCount = 0; // Zähler für Handler-Aufrufe
 
 async function toggleMonitoring() {
+  console.log("=== toggleMonitoring aufgerufen ===");
+  console.log("  isMonitoringActive:", isMonitoringActive);
+  
   const button = document.getElementById("toggleButton");
   
-  // Deaktiviere Button während der Aktion
   if (button) {
     button.disabled = true;
     button.style.opacity = "0.6";
@@ -126,21 +129,23 @@ async function toggleMonitoring() {
       await startMonitoring();
     }
   } finally {
-    // Aktiviere Button wieder
     if (button) {
       button.disabled = false;
       button.style.opacity = "1";
       button.style.cursor = "pointer";
     }
   }
+  
+  console.log("=== toggleMonitoring beendet ===");
 }
 
 async function startMonitoring() {
-  console.log("🚀 Starte Monitoring...");
+  console.log("=== startMonitoring aufgerufen ===");
+  console.log("  VOR Start - isMonitoringActive:", isMonitoringActive);
+  console.log("  VOR Start - eventHandlerContext:", eventHandlerContext);
   
-  // Verhindere Doppel-Start
   if (isMonitoringActive) {
-    console.log("⚠️ Monitoring läuft bereits!");
+    console.log("⚠️⚠️⚠️ ABBRUCH: Monitoring läuft bereits!");
     addLog("⚠️ Monitoring läuft bereits", "info");
     return;
   }
@@ -149,34 +154,43 @@ async function startMonitoring() {
     await Excel.run(async (context) => {
       const sheet = context.workbook.worksheets.getActiveWorksheet();
       
-      // WICHTIG: Entferne ALLE existierenden Handler zuerst
-      console.log("🧹 Räume alte Handler auf...");
-      sheet.onChanged.removeAll();
-      await context.sync();
+      console.log("🧹 Rufe removeAll() auf...");
+      try {
+        sheet.onChanged.removeAll();
+        await context.sync();
+        console.log("✅ removeAll() erfolgreich");
+      } catch (removeError) {
+        console.error("❌ Fehler bei removeAll():", removeError);
+      }
       
-      console.log("📝 Registriere neuen Handler...");
+      console.log("📝 Registriere Handler...");
       eventHandlerContext = sheet.onChanged.add(handleCellChange);
+      console.log("  Handler-Context erhalten:", eventHandlerContext);
       
       await context.sync();
-      console.log("✅ Event-Handler erfolgreich registriert");
+      console.log("✅ sync() abgeschlossen");
       
       isMonitoringActive = true;
       localStorage.setItem('monitoringActive', 'true');
+      console.log("  NACH Start - isMonitoringActive:", isMonitoringActive);
       
       updateStatusUI(true);
       addLog("✅ Bereit - Monitoring läuft im Hintergrund!", "success");
-      addLog("💡 Du kannst dieses Panel schließen - Monitoring läuft im Hintergrund", "info");
-      console.log("🔍 Überwache Spalte G...");
+      addLog("💡 Du kannst dieses Panel schließen", "info");
     });
   } catch (error) {
-    console.error("❌ Fehler in startMonitoring:", error);
+    console.error("❌ FEHLER in startMonitoring:", error);
     addLog("❌ Fehler beim Starten: " + error.message, "error");
-    isMonitoringActive = false; // Reset bei Fehler
+    isMonitoringActive = false;
   }
+  
+  console.log("=== startMonitoring beendet ===");
 }
 
 async function stopMonitoring() {
-  console.log("⏸️ Stoppe Monitoring...");
+  console.log("=== stopMonitoring aufgerufen ===");
+  console.log("  VOR Stop - isMonitoringActive:", isMonitoringActive);
+  console.log("  VOR Stop - eventHandlerContext:", eventHandlerContext);
   
   if (!isMonitoringActive) {
     console.log("⚠️ Monitoring ist bereits gestoppt");
@@ -187,24 +201,26 @@ async function stopMonitoring() {
     await Excel.run(async (context) => {
       const sheet = context.workbook.worksheets.getActiveWorksheet();
       
-      console.log("🗑️ Entferne alle Event-Handler...");
+      console.log("🗑️ Rufe removeAll() auf...");
       sheet.onChanged.removeAll();
       await context.sync();
       
       eventHandlerContext = null;
-      console.log("✅ Alle Event-Handler entfernt");
+      console.log("✅ Alle Handler entfernt");
     });
   } catch (error) {
-    console.error("❌ Fehler beim Entfernen der Handler:", error);
+    console.error("❌ Fehler beim Entfernen:", error);
   }
   
   isMonitoringActive = false;
   localStorage.setItem('monitoringActive', 'false');
+  console.log("  NACH Stop - isMonitoringActive:", isMonitoringActive);
   
   updateStatusUI(false);
   addLog("⏸️ Monitoring gestoppt", "info");
+  
+  console.log("=== stopMonitoring beendet ===");
 }
-
 
 
 // ===== UI UPDATE =====
@@ -250,6 +266,14 @@ function updateStatusUI(isActive) {
 
 // ===== EVENT HANDLER =====
 async function handleCellChange(event) {
+  handlerCallCount++;
+  console.log(`🔔 handleCellChange aufgerufen (Aufruf #${handlerCallCount}):`, event);
+  console.log("  isMonitoringActive:", isMonitoringActive);
+  
+  if (!isMonitoringActive) {
+    console.log("⚠️ Monitoring ist inaktiv, ignoriere Event");
+    return;
+  }
   console.log("🔔 handleCellChange aufgerufen:", event);
   
   if (!isMonitoringActive) {
