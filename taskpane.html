@@ -150,9 +150,51 @@
         .icon {
             margin-right: 5px;
         }
+
+				@keyframes pulse {
+					0%, 100% { opacity: 1; }
+					50% { opacity: 0.5; }
+				}
+				
+				.status-active {
+					background-color: #4CAF50 !important;
+					animation: none !important;
+				}
+				
+				.status-inactive {
+					background-color: #f44336 !important;
+				}
+
     </style>
 </head>
 <body>
+
+  <div id="statusIndicator" style="
+    position: fixed;
+    top: 10px;
+    right: 10px;
+    width: 15px;
+    height: 15px;
+    border-radius: 50%;
+    background-color: #f44336;
+    box-shadow: 0 0 10px rgba(0,0,0,0.3);
+    z-index: 9999;
+    animation: pulse 2s infinite;
+  "></div>
+
+  <div id="statusBar" style="
+    background: #f44336;
+    color: white;
+    padding: 15px;
+    text-align: center;
+    font-weight: bold;
+    font-size: 16px;
+    margin-bottom: 20px;
+    border-radius: 5px;
+  ">
+    🔴 MONITORING INAKTIV
+  </div>
+
     <div class="container">
         <h1>🔗 Webhook Monitor</h1>
         
