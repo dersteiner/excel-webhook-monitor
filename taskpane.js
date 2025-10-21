@@ -75,33 +75,65 @@ async function initializeMonitor() {
 }
 
 function initializeUI() {
-  // Füge Start/Stop Button hinzu wenn noch nicht vorhanden
-  const container = document.querySelector(".container") || document.body;
+  console.log("🎨 Initialisiere UI...");
   
-  // Prüfe ob Button schon existiert
-  if (!document.getElementById("toggleButton")) {
-    const buttonHTML = `
-      <button id="toggleButton" style="
-        width: 100%;
-        padding: 20px;
-        font-size: 18px;
-        font-weight: bold;
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        color: white;
-        border: none;
-        border-radius: 10px;
-        cursor: pointer;
-        margin-bottom: 20px;
-        transition: all 0.3s;
-        box-shadow: 0 4px 15px rgba(0,0,0,0.2);
-      ">
-        🚀 MONITORING STARTEN
-      </button>
-    `;
+  const button = document.getElementById("toggleButton");
+  
+  if (button) {
+    console.log("✅ Button gefunden, füge Event-Listener hinzu");
+    button.addEventListener("click", toggleMonitoring);
+    addLog("🎨 UI initialisiert", "info");
+  } else {
+    console.error("❌ toggleButton nicht gefunden!");
+    addLog("❌ Fehler: Button nicht gefunden", "error");
     
-    container.insertAdjacentHTML('afterbegin', buttonHTML);
-    
-    document.getElementById("toggleButton").addEventListener("click", toggleMonitoring);
+    // Fallback: Versuche Button dynamisch zu erstellen
+    setTimeout(() => {
+      createButtonFallback();
+    }, 500);
+  }
+}
+
+function createButtonFallback() {
+  console.log("🔧 Erstelle Button als Fallback...");
+  
+  // Finde einen Container
+  let container = document.querySelector(".container");
+  if (!container) {
+    container = document.querySelector("body");
+  }
+  
+  if (!container) {
+    console.error("❌ Kein Container gefunden!");
+    return;
+  }
+  
+  const buttonHTML = `
+    <button id="toggleButton" style="
+      width: calc(100% - 40px);
+      margin: 20px;
+      padding: 20px;
+      font-size: 18px;
+      font-weight: bold;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      border: none;
+      border-radius: 10px;
+      cursor: pointer;
+      transition: all 0.3s;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+    ">
+      🚀 MONITORING STARTEN
+    </button>
+  `;
+  
+  container.insertAdjacentHTML('afterbegin', buttonHTML);
+  
+  const button = document.getElementById("toggleButton");
+  if (button) {
+    button.addEventListener("click", toggleMonitoring);
+    console.log("✅ Fallback-Button erstellt");
+    addLog("✅ UI bereit", "success");
   }
 }
 
