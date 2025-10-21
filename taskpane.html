@@ -1,16 +1,6 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <meta charset="UTF-8" />
-    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Excel Webhook Monitor</title>
-    
-    <script src="https://appsforoffice.microsoft.com/lib/1/hosted/office.js" type="text/javascript"></script>
-</head>
-
-<body>
-  <!-- STATUS INDIKATOR -->
+<body style="margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;">
+  
+  <!-- STATUS INDIKATOR (Oben rechts) -->
   <div id="statusIndicator" style="
     position: fixed;
     top: 10px;
@@ -24,57 +14,68 @@
     animation: pulse 2s infinite;
   "></div>
 
-  <!-- STATUS BAR -->
-  <div id="statusBar" style="
-    background: #f44336;
-    color: white;
-    padding: 15px;
-    text-align: center;
-    font-weight: bold;
-    font-size: 16px;
-    margin-bottom: 20px;
-    border-radius: 5px;
-  ">
-    🔴 MONITORING INAKTIV
+  <!-- HAUPT-CONTAINER -->
+  <div style="padding: 20px;">
+    
+    <!-- STATUS BAR -->
+    <div id="statusBar" style="
+      background: #f44336;
+      color: white;
+      padding: 15px;
+      text-align: center;
+      font-weight: bold;
+      font-size: 16px;
+      margin-bottom: 20px;
+      border-radius: 5px;
+    ">
+      🔴 MONITORING INAKTIV
+    </div>
+
+    <!-- START/STOP BUTTON -->
+    <button id="toggleButton" style="
+      width: 100%;
+      padding: 20px;
+      font-size: 18px;
+      font-weight: bold;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      border: none;
+      border-radius: 10px;
+      cursor: pointer;
+      transition: all 0.3s;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+      margin-bottom: 20px;
+    ">
+      🚀 MONITORING STARTEN
+    </button>
+
+    <!-- LOG ÜBERSCHRIFT -->
+    <div style="
+      font-weight: bold;
+      margin-bottom: 10px;
+      color: #333;
+      font-size: 14px;
+    ">
+      📋 Activity Log
+    </div>
+
+    <!-- LOG BEREICH -->
+    <div id="log" style="
+      padding: 15px;
+      background: #f5f5f5;
+      border-radius: 5px;
+      max-height: 300px;
+      overflow-y: auto;
+      font-family: 'Courier New', monospace;
+      font-size: 12px;
+      border: 1px solid #ddd;
+    ">
+      <div class="log-entry info">[Warte auf Initialisierung...]</div>
+    </div>
+
   </div>
 
-  <!-- START/STOP BUTTON -->
-  <button id="toggleButton" style="
-    width: calc(100% - 40px);
-    margin: 0 20px 20px 20px;
-    padding: 20px;
-    font-size: 18px;
-    font-weight: bold;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    color: white;
-    border: none;
-    border-radius: 10px;
-    cursor: pointer;
-    transition: all 0.3s;
-    box-shadow: 0 4px 15px rgba(0,0,0,0.2);
-  ">
-    🚀 MONITORING STARTEN
-  </button>
-
-  <!-- LOG BEREICH -->
-  <div id="log" style="
-    margin: 20px;
-    padding: 15px;
-    background: #f5f5f5;
-    border-radius: 5px;
-    max-height: 400px;
-    overflow-y: auto;
-    font-family: monospace;
-    font-size: 12px;
-  "></div>
-
   <style>
-    body {
-      margin: 0;
-      padding: 0;
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-    }
-
     @keyframes pulse {
       0%, 100% { opacity: 1; }
       50% { opacity: 0.5; }
@@ -94,6 +95,7 @@
       margin: 5px 0;
       border-radius: 3px;
       background: white;
+      word-wrap: break-word;
     }
     
     .log-entry.success {
@@ -114,7 +116,7 @@
       border-left: 4px solid #17a2b8;
     }
 
-    #toggleButton:hover {
+    #toggleButton:hover:not(:disabled) {
       transform: translateY(-2px);
       box-shadow: 0 6px 20px rgba(0,0,0,0.3);
     }
@@ -123,8 +125,26 @@
       cursor: not-allowed !important;
       opacity: 0.6 !important;
     }
+
+    /* Scrollbar Styling */
+    #log::-webkit-scrollbar {
+      width: 8px;
+    }
+
+    #log::-webkit-scrollbar-track {
+      background: #f1f1f1;
+      border-radius: 10px;
+    }
+
+    #log::-webkit-scrollbar-thumb {
+      background: #888;
+      border-radius: 10px;
+    }
+
+    #log::-webkit-scrollbar-thumb:hover {
+      background: #555;
+    }
   </style>
 
   <script src="taskpane.js"></script>
 </body>
-</html>

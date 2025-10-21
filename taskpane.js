@@ -436,6 +436,12 @@ function addLog(message, type = "") {
     return;
   }
   
+  // Entferne Platzhalter beim ersten echten Log
+  const placeholder = logDiv.querySelector('.log-entry');
+  if (placeholder && placeholder.textContent.includes('Warte auf Initialisierung')) {
+    logDiv.innerHTML = '';
+  }
+  
   const entry = document.createElement("div");
   entry.className = "log-entry " + type;
   
@@ -444,9 +450,13 @@ function addLog(message, type = "") {
   
   logDiv.insertBefore(entry, logDiv.firstChild);
   
+  // Behalte nur die letzten 50 Einträge
   while (logDiv.children.length > 50) {
     logDiv.removeChild(logDiv.lastChild);
   }
+  
+  // Scroll nach oben zum neuesten Eintrag
+  logDiv.scrollTop = 0;
 }
 
 console.log("🔥 taskpane.js vollständig geladen");
