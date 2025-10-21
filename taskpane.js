@@ -138,7 +138,7 @@ function createButtonFallback() {
 }
 
 // ===== MONITORING STEUERUNG =====
-ilet isMonitoringActive = false;
+let isMonitoringActive = false;
 let eventHandlerContext = null;
 let handlerCallCount = 0; // Zähler für Handler-Aufrufe
 
