@@ -11,6 +11,7 @@ const ALLOWED_FILES = [
   "Projektliste.xlsx",
   "KOPIE",
   "2025",
+	"Anfragen"
 ];
 
 console.log("🔥 Konfiguration geladen:", { PROXY_URL, ALLOWED_FILES });
