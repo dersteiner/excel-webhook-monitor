@@ -106,7 +106,7 @@ function initializeUI() {
 }
 
 // ===== MONITORING STEUERUNG =====
-ilet isMonitoringActive = false;
+let isMonitoringActive = false;
 let eventHandlerContext = null;
 
 async function toggleMonitoring() {
