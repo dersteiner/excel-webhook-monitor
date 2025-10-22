@@ -8,6 +8,8 @@ const API_KEY = "akdsadhoiadoiwoqi8wd";
 // GLOBALE VARIABLEN - NUR EINMAL DEKLARIERT
 let isMonitoringActive = false;
 let eventHandlerContext = null;
+let handlerRegistered = false;
+
 
 // ===== INITIALISIERUNG =====
 Office.onReady((info) => {
@@ -108,9 +110,11 @@ async function toggleMonitoring() {
   }
 }
 
+
 async function startMonitoring() {
   console.log("=== startMonitoring aufgerufen ===");
-  console.log("  VOR Start - isMonitoringActive:", isMonitoringActive);
+  console.log("  isMonitoringActive:", isMonitoringActive);
+  console.log("  handlerRegistered:", handlerRegistered);
   
   if (isMonitoringActive) {
     console.log("⚠️⚠️⚠️ ABBRUCH: Monitoring läuft bereits!");
@@ -122,15 +126,16 @@ async function startMonitoring() {
     await Excel.run(async (context) => {
       const sheet = context.workbook.worksheets.getActiveWorksheet();
       
-      console.log("🧹 Räume alte Handler auf...");
-      sheet.onChanged.removeAll();
-      await context.sync();
-      
-      console.log("📝 Registriere neuen Handler...");
-      eventHandlerContext = sheet.onChanged.add(handleCellChange);
-      
-      await context.sync();
-      console.log("✅ Event-Handler erfolgreich registriert");
+      // NUR registrieren wenn noch nicht registriert
+      if (!handlerRegistered) {
+        console.log("📝 Registriere Handler zum ersten Mal...");
+        eventHandlerContext = sheet.onChanged.add(handleCellChange);
+        await context.sync();
+        handlerRegistered = true;
+        console.log("✅ Handler erfolgreich registriert");
+      } else {
+        console.log("ℹ️ Handler bereits registriert, überspringe Registrierung");
+      }
       
       isMonitoringActive = true;
       localStorage.setItem('monitoringActive', 'true');
@@ -161,12 +166,15 @@ async function stopMonitoring() {
     await Excel.run(async (context) => {
       const sheet = context.workbook.worksheets.getActiveWorksheet();
       
-      console.log("🗑️ Entferne alle Event-Handler...");
-      sheet.onChanged.removeAll();
-      await context.sync();
-      
-      eventHandlerContext = null;
-      console.log("✅ Alle Event-Handler entfernt");
+      if (handlerRegistered && eventHandlerContext) {
+        console.log("🗑️ Entferne Event-Handler...");
+        eventHandlerContext.remove();
+        await context.sync();
+        
+        handlerRegistered = false;
+        eventHandlerContext = null;
+        console.log("✅ Event-Handler entfernt");
+      }
     });
   } catch (error) {
     console.error("❌ Fehler beim Entfernen:", error);
@@ -178,6 +186,12 @@ async function stopMonitoring() {
   updateStatusUI(false);
   addLog("⏸️ Monitoring gestoppt", "info");
 }
+
+
+
+
+
+
 
 // ===== UI UPDATE =====
 function updateStatusUI(isActive) {
@@ -221,6 +235,9 @@ function updateStatusUI(isActive) {
 }
 
 // ===== EVENT HANDLER =====
+let lastProcessedCell = null;
+let lastProcessedTime = 0;
+
 async function handleCellChange(event) {
   console.log("🔔 handleCellChange aufgerufen:", event);
   
@@ -228,6 +245,18 @@ async function handleCellChange(event) {
     console.log("⚠️ Monitoring ist inaktiv, ignoriere Event");
     return;
   }
+  
+  // DEBOUNCE: Ignoriere gleiche Zelle innerhalb von 1 Sekunde
+  const currentTime = Date.now();
+  const cellKey = event.address;
+  
+  if (cellKey === lastProcessedCell && (currentTime - lastProcessedTime) < 1000) {
+    console.log("⏭️ Überspringe doppeltes Event für", cellKey);
+    return;
+  }
+  
+  lastProcessedCell = cellKey;
+  lastProcessedTime = currentTime;
   
   try {
     await Excel.run(async (context) => {
@@ -275,7 +304,6 @@ async function handleCellChange(event) {
     addLog("❌ Fehler: " + error.message, "error");
   }
 }
-
 // ===== WEBHOOK SENDEN =====
 async function sendWebhook(rowNumber, rowData) {
   console.log("📤 Sende Webhook...");
