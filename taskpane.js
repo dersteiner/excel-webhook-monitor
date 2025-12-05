@@ -257,6 +257,22 @@ async function handleCellChange(event) {
   
   lastProcessedCell = cellKey;
   lastProcessedTime = currentTime;
+
+  // ===== NEU: Prüfe die Quelle der Änderung =====
+  console.log("🔍 Event Source:", event.source);
+  console.log("🔍 Event Change Type:", event.changeType);
+  
+  // Wenn die Änderung NICHT vom User kommt, ignorieren
+  if (event.source !== Excel.EventSource.local) {
+    console.log(`⏭️ Ignoriere Änderung - Quelle ist: ${event.source} (nicht local)`);
+    addLog(`⏭️ API-Änderung ignoriert (Source: ${event.source})`);
+    return;
+  }
+  
+  console.log("✅ Änderung vom User bestätigt!");
+  // ===== Ende der Source-Prüfung =====
+  
+
   
   try {
     await Excel.run(async (context) => {
@@ -271,13 +287,13 @@ async function handleCellChange(event) {
       
       console.log(`📍 Änderung in Spalte ${column}, Zeile ${row}`);
       
-      if (column !== "G") {
+      if (column !== "H") {
         console.log(`⏭️ Ignoriere Spalte ${column}`);
         return;
       }
       
-      console.log("✅ Spalte G betroffen!");
-      addLog(`📝 Änderung in Spalte G: Zeile ${row}`);
+      console.log("✅ Spalte H betroffen!");
+      addLog(`📝 Änderung in Spalte H: Zeile ${row}`);
       
       const sheet = context.workbook.worksheets.getActiveWorksheet();
       
