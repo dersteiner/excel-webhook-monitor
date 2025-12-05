@@ -143,7 +143,7 @@ async function startMonitoring() {
       updateStatusUI(true);
       addLog("✅ Bereit - Monitoring läuft im Hintergrund!", "success");
       addLog("💡 Du kannst dieses Panel schließen", "info");
-      console.log("🔍 Überwache Spalte G...");
+      console.log("🔍 Überwache Spalte H...");
     });
   } catch (error) {
     console.error("❌ Fehler in startMonitoring:", error);
